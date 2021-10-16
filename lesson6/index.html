@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lesson 6</title>
+    <script src="https://cdn.socket.io/4.2.0/socket.io.min.js" integrity="sha384-PiBR5S00EtOj2Lto9Uu81cmoyZqR57XcOna1oAuVuIEjzj0wpqDVfD0JA9eXlRsj" crossorigin="anonymous"></script>
+</head>
+<body>
+<input id="input" type="text" autofocus>
+<button id="button">Send</button>
+<div id="clientCount"></div>
+<div id="notification"></div>
+<div id="messages"></div>
+
+<script>
+    const socket = io('localhost:3000')
+    const messageBlock = document.getElementById('messages')
+    const sendButton = document.getElementById('button')
+    const input = document.getElementById('input')
+    const notificationBlock = document.getElementById('notification')
+    const clientCountBlock = document.getElementById('clientCount')
+
+    const messagesToHTML = (messages) => {
+        let result = '<ul>'
+        messages.forEach(msg => {
+            result += `<li><strong>${msg.client}:</strong>${msg.message}</li>`
+        })
+        result += '</ul>'
+        return result
+    }
+
+    socket.on('initial-state', ({ messages, clientCount }) => {
+        clientCountBlock.innerHTML = `Подключено пользователей: ${clientCount}`
+        messageBlock.innerHTML = messagesToHTML(messages)
+    })
+
+    socket.on('notification-to-all', data => {
+        const randomKey = Math.floor(Math.random() * 100000)
+        notificationBlock.insertAdjacentHTML('beforeend', `<p id="${randomKey}">${data.msg}</p>`)
+        clientCountBlock.innerHTML = `Подключено пользователей: ${data.clientCount}`
+
+        const notificationRemove = (id) => {
+            const notification = document.getElementById(id)
+            notification.remove()
+        }
+        setTimeout(() => { notificationRemove(randomKey) }, 5000)
+    })
+
+    sendButton.onclick = () => {
+        const data = {
+            message: input.value
+        }
+        socket.emit('client-msg', data)
+    }
+
+    socket.on('new-message', (messages ) => {
+        messageBlock.innerHTML = messagesToHTML(messages)
+    })
+</script>
+</body>
+</html>
