@@ -13,7 +13,9 @@
     "colors": "^1.4.0",
     "inquirer": "^8.2.0",
     "moment": "^2.29.1",
+    "nodemon": "^2.0.13",
     "prompt": "^1.2.0",
+    "socket.io": "^4.3.0",
     "yargs": "^17.2.1"
   }
 }
